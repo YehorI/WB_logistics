@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "wb-logistics"
+version = "0.1.0"
+description = ""
+authors = ["YehorI <ivanov.e.s@my.mgimo.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aiogram = "^3.12"
+loguru = "^0.7.2"
+python-dotenv = "^1.0.1"
+aiolimiter = "^1.1.0"
+facet = "^0.10.1"
+pydantic = "^2.8.2"
+aiosqlite = "^0.20.0"
+pandas = "^2.2.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
