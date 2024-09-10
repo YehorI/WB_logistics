@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from app.api_monitor import WildberriesSupplyAPIMonitor
 from app.bot import TelegramBot
+from app.config import Config
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -18,14 +19,14 @@ class Service:
     async def start_monitor(self):
         token = os.getenv("WB_SUPPLY_API_TOKEN")
         api_url = os.getenv("WB_SUPPLY_API_URL")
-        requests_per_minute = 5
-        self.monitor = WildberriesSupplyAPIMonitor(token, api_url, requests_per_minute)
+        requests_per_minute = 6
+        self.monitor = WildberriesSupplyAPIMonitor(token, api_url, Config.db_path, requests_per_minute)
         await self.monitor.run()
 
     async def start_bot(self):
         BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-        DB_PATH = 'cache.db'
-        CHAT_IDS = [364633558]  # Replace with actual chat IDs
+        DB_PATH = Config.db_path
+        CHAT_IDS = os.getenv("RECIEVER_IDS").split(",")
 
         if not BOT_TOKEN:
             logger.error("Bot token not found in environment variables")
@@ -51,7 +52,7 @@ class Service:
                         await task
                     except asyncio.CancelledError:
                         pass
-            
+
             logger.info("Shutdown complete")
 
 async def test_monitor():

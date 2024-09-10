@@ -2,9 +2,18 @@ import os
 import asyncio
 import aiohttp
 import logging
-from aiolimiter import AsyncLimiter
-from app.db import WildberriesCacheManager
+
 from dotenv import load_dotenv
+
+from aiolimiter import AsyncLimiter
+from app.db.db import (
+    WildberriesCacheManager,
+    TrackedWarehouseManager,
+    BoxTypeManager,
+    DateManager,
+)
+from app.config import Config
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -14,19 +23,27 @@ class WildberriesSupplyAPIMonitor:
         self,
         token: str,
         api_url: str,
-        requests_per_minute: int = 5,
-        db_path: str = 'cache.db'
+        db_path: str,
+        requests_per_minute: int = 6,
     ):
         self.token = token
         self.api_url = api_url
         self.requests_per_minute = requests_per_minute
         self.rate_limiter = AsyncLimiter(requests_per_minute, 60)
+
         self.cache_manager = WildberriesCacheManager(db_path)
+        self.tracked_warehouse_manager = TrackedWarehouseManager(db_path)
+        self.box_type_manager = BoxTypeManager(db_path)
+        self.date_manager = DateManager(db_path)
+
         self.cache_refresh_interval = 60 // requests_per_minute  # Calculate refresh interval in seconds
         self.is_running = False
 
     async def initialize(self):
         await self.cache_manager.initialize()
+        await self.tracked_warehouse_manager.initialize()
+        await self.box_type_manager.initialize()
+        await self.date_manager.initialize()
 
     async def make_request(self) -> list:
         headers = {
@@ -90,9 +107,10 @@ async def main():
 
     token = os.getenv("WB_SUPPLY_API_TOKEN")
     api_url = os.getenv("WB_SUPPLY_API_URL")
+    db_path = Config.db_path
     requests_per_minute = 5
 
-    monitor = WildberriesSupplyAPIMonitor(token, api_url, requests_per_minute)
+    monitor = WildberriesSupplyAPIMonitor(token, api_url, db_path, requests_per_minute)
     try:
         await monitor.run()
     except KeyboardInterrupt:

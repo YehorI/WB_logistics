@@ -1,0 +1,11 @@
+help: >
+  Это ручка /help
+start: >
+  Это ручка /start
+enter_coefficient: >
+  Введите желаемый коэффициент
+coefficient_failure: >
+  Некорректный коэффициент,
+  Нажмите на кнопку заново и попробуйте еще раз
+coefficient_success: >
+  Коэффициент обновлен
